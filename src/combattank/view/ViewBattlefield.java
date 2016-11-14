@@ -5,7 +5,10 @@
  */
 package combattank.view;
 
+import combattank.controller.*;
 import componente.battleField;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 /**
  *
@@ -19,6 +22,7 @@ public class ViewBattlefield extends javax.swing.JFrame {
     public ViewBattlefield() {
         initComponents();
         initBattleField();
+        initTank();
         run();
     }
 
@@ -78,7 +82,6 @@ public class ViewBattlefield extends javax.swing.JFrame {
         //</editor-fold>
         //</editor-fold>
 
-        System.out.println("run");
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
@@ -89,8 +92,41 @@ public class ViewBattlefield extends javax.swing.JFrame {
     
     private void initBattleField(){
         battleField campoBatalha = new battleField();
+        campoBatalha.setLocation(50,70);
+        campoBatalha.setSize(500, 500);
         campoBatalha.setVisible(true);
+        
         this.add(campoBatalha);
+    }
+    
+    private void initTank(){
+        controllerTank tank = new controllerTank();
+        
+        new Thread(){
+            @Override
+            public void run(){
+                moveTank();
+            }
+        }.start();
+    }
+    
+    private void moveTank(){
+        this.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                System.out.println("Pressed " + e.getKeyChar());
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                System.out.println("Pressed " + e.getKeyChar());
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                System.out.println("Pressed " + e.getKeyChar());
+            }
+        });
     }
     
 

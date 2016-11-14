@@ -10,7 +10,6 @@ package combattank;
  * @author skyli
  */
 import combattank.view.*;
-import javax.swing.JPanel;
 
 public class CombatTank {
 

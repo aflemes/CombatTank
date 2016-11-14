@@ -19,32 +19,34 @@ public class battleField extends javax.swing.JPanel {
      */
     public battleField() {
         initComponents();
-        initSQM(9,9);
+        initSQM(9,8);
     }
     
     private void initSQM(int horizontal, int vertical){
         JPanel SQM;
-        int posX = 0, posY = 0;
+        int posX = 0, posY = 0, size;
+        // seta tamanho dos blocos
+        size = 30;       
         
         for (int i = 1; i <= horizontal; i++){
             SQM = new JPanel();
             SQM.setName("i" + String.valueOf(i) + "j0");
-            SQM.setSize(60,60);
+            SQM.setSize(size,size);
             SQM.setLocation(posX, posY);
-            SQM.setBackground(Color.blue);
+            SQM.setBackground(Color.green);
             this.add(SQM);
             
             for (int j = 2; j <= vertical; j++){
-                posY += 61;
+                posY += size + 1;
                 SQM = new JPanel();
                 SQM.setName("i" + String.valueOf(i) + "j" + String.valueOf(j));
-                SQM.setSize(60,60);
+                SQM.setSize(size,size);
                 SQM.setLocation(posX, posY);
-                SQM.setBackground(Color.red);
+                SQM.setBackground(Color.green);
                 SQM.setVisible(true);
                 this.add(SQM);                
             }            
-            posX += 61;            
+            posX += size + 1;            
             posY = 0;
         }        
     }
