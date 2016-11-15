@@ -2,13 +2,17 @@
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
+ *
+ * SQM = Squaremeters;
  */
 package combattank.view;
 
 import combattank.controller.*;
-import componente.battleField;
+import componente.*;
+import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import javax.swing.JPanel;
 
 /**
  *
@@ -19,6 +23,9 @@ public class ViewBattlefield extends javax.swing.JFrame {
     /**
      * Creates new form NewJFrame
      */
+    private int matBattleField[][];
+    private battleField campoBatalha;
+    
     public ViewBattlefield() {
         initComponents();
         initBattleField();
@@ -91,45 +98,159 @@ public class ViewBattlefield extends javax.swing.JFrame {
     }
     
     private void initBattleField(){
-        battleField campoBatalha = new battleField();
-        campoBatalha.setLocation(50,70);
+        campoBatalha = new battleField();
+        campoBatalha.setLocation(50,100);
         campoBatalha.setSize(500, 500);
         campoBatalha.setVisible(true);
-        
+        matBattleField = campoBatalha.getMatBattleField();
         this.add(campoBatalha);
     }
     
     private void initTank(){
-        controllerTank tank = new controllerTank();
+        //controllerTank tank = new controllerTank();
+        int idTank = 1;
+        JPanel tank = new JPanel();
+        tank.setSize(18, 18);
+        tank.setLocation(5, 5);
+        tank.setBackground(Color.black);
+        
+        JPanel sqmAux = getSQM(1,5);
+        matBattleField[1][5] = idTank;
+        
+        sqmAux.add(tank);
         
         new Thread(){
             @Override
             public void run(){
-                moveTank();
+                moveTank(idTank);
             }
         }.start();
     }
     
-    private void moveTank(){
+    private void moveTank(int idTank){
         this.addKeyListener(new KeyListener() {
             @Override
-            public void keyTyped(KeyEvent e) {
-                System.out.println("Pressed " + e.getKeyChar());
-            }
+            public void keyTyped(KeyEvent e) {}
 
             @Override
             public void keyPressed(KeyEvent e) {
-                System.out.println("Pressed " + e.getKeyChar());
+                if (e.getKeyCode() != 32)
+                    moveTankByKeyPress(e.getKeyCode(),idTank);
+                else
+                    shootTank(idTank);
             }
 
             @Override
-            public void keyReleased(KeyEvent e) {
-                System.out.println("Pressed " + e.getKeyChar());
-            }
+            public void keyReleased(KeyEvent e) {}
         });
     }
     
+    private void moveTankByKeyPress(int keyCode, int idTank){
+        int[] oldSQM = null;
+        int xAux, yAux;
+        
+        //encontra o tank e remove do panel
+        oldSQM = getSQMByTank(idTank);
+        if (oldSQM != null){
+            removeTank(oldSQM);
+            adicionaTank(oldSQM,keyCode);
+            //coloca o tank no proximo SQM
+        }
+    }
+    
+    //procura no campo de batalha o jpanel com o nome correspondente
+    private SQM getSQM(int x, int y){
+        SQM sqmAux = new SQM();
+        
+        for (int i = 0; i < campoBatalha.getComponentCount(); i++) {
+            try{
+                sqmAux = (SQM) campoBatalha.getComponent(i);
+            }catch(Exception E){}
+            
+            if (sqmAux.getPosX() == x && sqmAux.getPosY() == y)
+                return (SQM) campoBatalha.getComponent(i);
+        }
+        
+        return null;
+    }
+    
+    private int[] getSQMByTank(int idTank){
+        int[] retorno = new int[2];
+        
+        for (int i = 0; i < matBattleField.length; i++) {
+            for (int j = 0; j < matBattleField[j].length; j++) {
+                if (matBattleField[i][j] == idTank){
+                    System.out.println(" i " + String.valueOf(i));
+                    retorno[0] = i;
+                    retorno[1] = j;
+                    
+                    return retorno;
+                }
+            }
+        }
+        return null;
+    }
+    
+    private void removeTank(int[] oldSQM){
+        JPanel jPanelAux;
+        jPanelAux = getSQM(oldSQM[0], oldSQM[1]);
+        //remove tank do campo de batalha
+        matBattleField[oldSQM[0]][oldSQM[1]] = 0;
+        jPanelAux.removeAll();
+        jPanelAux.repaint();
+    }
+    
+    private void adicionaTank(int[] oldSQM, int keyCode){
+        int posX = oldSQM[0];
+        int posY = oldSQM[1];
+        SQM sqmAux = new SQM();
+        
+        JPanel tank = new JPanel();
+        tank.setSize(18, 18);
+        tank.setLocation(5, 5);
+        tank.setBackground(Color.black);
+        
+        switch(keyCode){
+            case 38:
+            case 87:
+                sqmAux = getSQM(posX, posY - 1);
+                matBattleField[posX][posY - 1] = 1;                
+                break;
+            case 39:
+            case 68:
+                sqmAux = getSQM(posX + 1, posY);
+                matBattleField[posX + 1][posY] = 1;                
+                break;
+            case 40:
+            case 83:
+                sqmAux = getSQM(posX, posY + 1);
+                matBattleField[posX][posY + 1] = 1;                
+                break;
+            case 65:
+            case 37:
+                sqmAux = getSQM(posX - 1, posY);
+                matBattleField[posX - 1][posY] = 1;                
+                break;
+            
+        }
+        
+        sqmAux.add(tank);
+        sqmAux.repaint();
+        
+    }
 
+    private void shootTank(int idTank){
+        new Thread(){
+            @Override
+            public void run(){
+                shoot(idTank);
+            }
+        }.start();
+    }
+    
+    private void shoot(int idTank){
+        
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
 }

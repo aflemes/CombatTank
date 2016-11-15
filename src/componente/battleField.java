@@ -17,40 +17,59 @@ public class battleField extends javax.swing.JPanel {
     /**
      * Creates new form battleField
      */
+    private int matBattleField[][];
+
+    public int[][] getMatBattleField() {
+        return matBattleField;
+    }
+
+    public void setMatBattleField(int[][] matBattleField) {
+        this.matBattleField = matBattleField;
+    }
+    
     public battleField() {
         initComponents();
-        initSQM(9,8);
+        initSQM(12,9);
+        inicializaMatriz();
+    }
+    
+    private void inicializaMatriz(){
+        this.setMatBattleField(new int[12][9]);
     }
     
     private void initSQM(int horizontal, int vertical){
-        JPanel SQM;
+        SQM sqmAux;
         int posX = 0, posY = 0, size;
         // seta tamanho dos blocos
         size = 30;       
         
         for (int i = 1; i <= horizontal; i++){
-            SQM = new JPanel();
-            SQM.setName("i" + String.valueOf(i) + "j0");
-            SQM.setSize(size,size);
-            SQM.setLocation(posX, posY);
-            SQM.setBackground(Color.green);
-            this.add(SQM);
+            sqmAux = new SQM();
+            sqmAux.setPosX(i);
+            sqmAux.setPosY(1);
+            
+            sqmAux.setSize(size,size);
+            sqmAux.setLocation(posX, posY);
+            sqmAux.setBackground(Color.green);
+            this.add(sqmAux);
             
             for (int j = 2; j <= vertical; j++){
                 posY += size + 1;
-                SQM = new JPanel();
-                SQM.setName("i" + String.valueOf(i) + "j" + String.valueOf(j));
-                SQM.setSize(size,size);
-                SQM.setLocation(posX, posY);
-                SQM.setBackground(Color.green);
-                SQM.setVisible(true);
-                this.add(SQM);                
+                sqmAux = new SQM();
+                sqmAux.setPosX(i);
+                sqmAux.setPosY(j);
+            
+                sqmAux.setSize(size,size);
+                sqmAux.setLocation(posX, posY);
+                sqmAux.setBackground(Color.green);
+                sqmAux.setVisible(true);
+                this.add(sqmAux);                
             }            
             posX += size + 1;            
             posY = 0;
-        }        
+        }
     }
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
