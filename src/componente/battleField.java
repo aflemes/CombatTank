@@ -6,7 +6,6 @@
 package componente;
 
 import java.awt.Color;
-import javax.swing.JPanel;
 
 /**
  *
@@ -43,17 +42,17 @@ public class battleField extends javax.swing.JPanel {
         // seta tamanho dos blocos
         size = 30;       
         
-        for (int i = 1; i <= horizontal; i++){
+        for (int i = 0; i < horizontal; i++){
             sqmAux = new SQM();
             sqmAux.setPosX(i);
-            sqmAux.setPosY(1);
+            sqmAux.setPosY(0);
             
             sqmAux.setSize(size,size);
             sqmAux.setLocation(posX, posY);
             sqmAux.setBackground(Color.green);
             this.add(sqmAux);
             
-            for (int j = 2; j <= vertical; j++){
+            for (int j = 1; j < vertical; j++){
                 posY += size + 1;
                 sqmAux = new SQM();
                 sqmAux.setPosX(i);
