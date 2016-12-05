@@ -18,8 +18,8 @@ public class CombatTank {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        ViewBattlefield sandbox = new ViewBattlefield(); 
-        sandbox.setSize(500, 500);        
+        //ViewBattlefield sandbox = new ViewBattlefield(); 
+
     }
     
 }
