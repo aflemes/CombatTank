@@ -18,7 +18,8 @@ public class CombatTank {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        //ViewBattlefield sandbox = new ViewBattlefield(); 
+        MainMenu main = new MainMenu();
+        
 
     }
     

@@ -40,31 +40,34 @@ public class ViewBattlefield extends javax.swing.JFrame {
 	private lifeBar lifeBarAux;
 	private ServerSocket socketServidor;
 	private Socket socketClient;
+        private boolean lgServidor = false;
 	private boolean ready;
 
 	public ViewBattlefield(ServerSocket server) {
-		System.out.println("Servidor - " + server.toString());
-		socketServidor = server;
-		initComponents();
-		initLifeBar();
-		initBattleField();
-		initServer();
-		run();
+            System.out.println("Servidor - " + server.toString());
+            socketServidor = server;
+            lgServidor = true;
+            initComponents();
+            initLifeBar();
+            initBattleField();
+            initServer();
+            run();
 	}
 
 	public ViewBattlefield(Socket client) {
-		System.out.println("Client - " + client.toString());
-		socketClient = client;
-		initComponents();
-		initLifeBar();
-		initBattleField();
-		initClient();
+            System.out.println("Client - " + client.toString());
+            socketClient = client;
+            lgServidor = false;
+            initComponents();
+            initLifeBar();
+            initBattleField();
+            initClient();
 
-		run();
+            run();
 	}
-
+        
 	private void run() {
-		this.setVisible(true);
+            this.setVisible(true);
 	}
 
 	/**
@@ -135,190 +138,190 @@ public class ViewBattlefield extends javax.swing.JFrame {
 	// }
 
 	private void initLifeBar() {
-		lifeBarAux = new lifeBar();
-		lifeBarAux.setQtdeLife(3); // 3 vidas
+            lifeBarAux = new lifeBar();
+            lifeBarAux.setQtdeLife(3); // 3 vidas
 
-		lifeBarAux.setLocation(330, 1);
-		lifeBarAux.setSize(150, 40);
-		this.add(lifeBarAux);
+            lifeBarAux.setLocation(330, 1);
+            lifeBarAux.setSize(150, 40);
+            this.add(lifeBarAux);
 	}
 
 	private void initBattleField() {
-		campoBatalha = new battleField();
-		campoBatalha.setLocation(50, 100);
-		campoBatalha.setSize(500, 500);
-		campoBatalha.setVisible(true);
-		matBattleField = campoBatalha.getMatBattleField();
-		this.add(campoBatalha);
+            campoBatalha = new battleField();
+            campoBatalha.setLocation(50, 100);
+            campoBatalha.setSize(500, 500);
+            campoBatalha.setVisible(true);
+            matBattleField = campoBatalha.getMatBattleField();
+            this.add(campoBatalha);
 	}
 
 	private void initServer() {
-		// controllerTank tank = new controllerTank();
+            // controllerTank tank = new controllerTank();
 
-		tank tankTemp;
-		JPanel sqmAux;
-		tankTemp = new tank();
-		tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-um-leste.png")));
-		tankTemp.setSize(25, 25);
-		tankTemp.setLocation(2, 2);
-		tankTemp.setDirecao("leste");
+            tank tankTemp;
+            JPanel sqmAux;
+            tankTemp = new tank();
+            tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-um-leste.png")));
+            tankTemp.setSize(25, 25);
+            tankTemp.setLocation(2, 2);
+            tankTemp.setDirecao("leste");
 
-		sqmAux = getSQM(0, 4);
-		matBattleField[0][4] = 1;
+            sqmAux = getSQM(0, 4);
+            matBattleField[0][4] = 1;
 
-		sqmAux.add(tankTemp);
+            sqmAux.add(tankTemp);
 
-		tankTemp = new tank();
-		tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-oeste.png")));
-		tankTemp.setSize(25, 25);
-		tankTemp.setLocation(2, 2);
+            tankTemp = new tank();
+            tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-oeste.png")));
+            tankTemp.setSize(25, 25);
+            tankTemp.setLocation(2, 2);
 
-		sqmAux = getSQM(11, 4);
-		matBattleField[11][4] = 2;
+            sqmAux = getSQM(11, 4);
+            matBattleField[11][4] = 2;
 
-		sqmAux.add(tankTemp);
-		sqmAux.repaint();
+            sqmAux.add(tankTemp);
+            sqmAux.repaint();
 
-		new Thread() {
-			@Override
-			public void run() {
-				moveTank(1);
-			}
-		}.start();
+            new Thread() {
+                @Override
+                public void run() {
+                        moveTank(1);
+                }
+            }.start();
 
-		new Thread() {
-			@Override
-			public void run() {
-				try {
-					receiveInputs(2);
-				} catch (IOException e) {
-					System.out.println("Ocorreu um erro esperado, mas não tão esperado assim para tratarmos.");
-					e.printStackTrace();
-				}
-			}
-		}.start();
+            new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        receiveInputs(2);
+                    } catch (IOException e) {
+                        System.out.println("Ocorreu um erro esperado, mas nï¿½o tï¿½o esperado assim para tratarmos.");
+                        e.printStackTrace();
+                    }
+                }
+            }.start();
 	}
 
 	private void initClient() {
-		// controllerTank tank = new controllerTank();
-		tank tankTemp;
-		JPanel sqmAux;
-		tankTemp = new tank();
-		tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-um-leste.png")));
-		tankTemp.setSize(25, 25);
-		tankTemp.setLocation(2, 2);
-		tankTemp.setDirecao("leste");
+            // controllerTank tank = new controllerTank();
+            tank tankTemp;
+            JPanel sqmAux;
+            tankTemp = new tank();
+            tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-um-leste.png")));
+            tankTemp.setSize(25, 25);
+            tankTemp.setLocation(2, 2);
+            tankTemp.setDirecao("leste");
 
-		sqmAux = getSQM(0, 4);
-		matBattleField[0][4] = 1;
+            sqmAux = getSQM(0, 4);
+            matBattleField[0][4] = 1;
 
-		sqmAux.add(tankTemp);
+            sqmAux.add(tankTemp);
 
-		tankTemp = new tank();
-		tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-oeste.png")));
-		tankTemp.setSize(25, 25);
-		tankTemp.setLocation(2, 2);
+            tankTemp = new tank();
+            tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-oeste.png")));
+            tankTemp.setSize(25, 25);
+            tankTemp.setLocation(2, 2);
 
-		sqmAux = getSQM(11, 4);
-		matBattleField[11][4] = 2;
+            sqmAux = getSQM(11, 4);
+            matBattleField[11][4] = 2;
 
-		sqmAux.add(tankTemp);
-		sqmAux.repaint();
-		
-		
-		new Thread() {
-			@Override
-			public void run() {
-				try {
-					receiveInputs(1);
-				} catch (IOException e) {
-					System.out.println("Ocorreu um erro esperado, mas não tão esperado assim para tratarmos.");
-					e.printStackTrace();
-				}
-			}
-		}.start();
+            sqmAux.add(tankTemp);
+            sqmAux.repaint();
 
-		new Thread() {
-			@Override
-			public void run() {
-				moveTank(2);
-			}
-		}.start();
+
+            new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        receiveInputs(1);
+                    } catch (IOException e) {
+                        System.out.println("Ocorreu um erro esperado, mas nï¿½o tï¿½o esperado assim para tratarmos.");
+                        e.printStackTrace();
+                    }
+                }
+            }.start();
+
+            new Thread() {
+                    @Override
+                    public void run() {
+                            moveTank(2);
+                    }
+            }.start();
 
 	}
 
 
-	private void sendData(int idTank, int keyCode) {
-		
-		try {
-			PrintWriter out = new PrintWriter(new BufferedWriter( new OutputStreamWriter(socketClient.getOutputStream())),true);
-			out.println(Integer.toString(keyCode));
-		} catch (IOException e1) {
-			System.out.println("Ocorreu um erro esperado, mas não tão esperado assim para tratarmos.");
-			e1.printStackTrace();
-		}
+	private void sendData(int idTank, int keyCode){
+            
+            try {
+                PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socketClient.getOutputStream())),true);
+                out.println(Integer.toString(keyCode));
+            } catch (IOException e1) {
+                System.out.println("Ocorreu um erro esperado, mas nï¿½o tï¿½o esperado assim para tratarmos.");
+                e1.printStackTrace();
+            }
+            
 	}
 
 	private void moveTank(int idTank) {
 
 		this.addKeyListener(new KeyListener() {
-			@Override
-			public void keyTyped(KeyEvent e) {
+                    @Override
+                    public void keyTyped(KeyEvent e) {
 
-			}
+                    }
 
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() != 32) {
-					moveTankByKeyPress(e.getKeyCode(), idTank);
-				} else
-					shootTank(idTank);
-				sendData(idTank, e.getKeyCode());
+                    @Override
+                    public void keyPressed(KeyEvent e) {
+                        if (e.getKeyCode() != 32) {
+                            moveTankByKeyPress(e.getKeyCode(), idTank);
+                        } else
+                            shootTank(idTank);
 
-			}
+                        sendData(idTank, e.getKeyCode());
+                    }
 
-			@Override
-			public void keyReleased(KeyEvent e) {
-			}
+                    @Override
+                    public void keyReleased(KeyEvent e) {
+                    }
 		});
 	}
 
 	private void receiveInputs(int idTank) throws IOException {
 		int keyCode;
 		if (idTank == 2) {
+                    socketClient = socketServidor.accept();	
+                    while (true) {
+                        BufferedReader inFromClient = new BufferedReader(new InputStreamReader(socketClient.getInputStream()));
+                        String received = inFromClient.readLine();
+                        System.out.println(received);
+                        keyCode = Integer.parseInt(received);
 
-			socketClient = socketServidor.accept();	
-			while (true) {
-				BufferedReader inFromClient = new BufferedReader(
-						new InputStreamReader(socketClient.getInputStream()));
-				String received = inFromClient.readLine();
-				System.out.println(received);
-				keyCode = Integer.parseInt(received);
-
-				if (keyCode != 32) {
-					moveTankByKeyPress(keyCode, idTank);
-				} else
-					shootTank(idTank);
-				/*
-				 * if(inFromClient.readLine().equals(anObject);
-				 * System.out.println("Received: " + clientSentence);
-				 * capitalizedSentence = clientSentence.toUpperCase() + '\n';
-				 * outToClient.writeBytes(capitalizedSentence);
-				 */
-			}
+                        if (keyCode != 32) {
+                                moveTankByKeyPress(keyCode, idTank);
+                        } else
+                                shootTank(idTank);
+                        /*
+                         * if(inFromClient.readLine().equals(anObject);
+                         * System.out.println("Received: " + clientSentence);
+                         * capitalizedSentence = clientSentence.toUpperCase() + '\n';
+                         * outToClient.writeBytes(capitalizedSentence);
+                         */
+                    }
 		}
 		if (idTank == 1) {
-			while (true) {
-				BufferedReader inFromServer = new BufferedReader(new InputStreamReader(socketClient.getInputStream()));
-				String received = inFromServer.readLine();
-				System.out.println(received);
-				keyCode = Integer.parseInt(received);
+                    System.out.println("|");
+                    while (true) {
+                        BufferedReader inFromServer = new BufferedReader(new InputStreamReader(socketClient.getInputStream()));
+                        String received = inFromServer.readLine();
+                        System.out.println(received);
+                        keyCode = Integer.parseInt(received);
 
-				if (keyCode != 32) {
-					moveTankByKeyPress(keyCode, idTank);
-				} else
-					shootTank(idTank);
-			}
+                        if (keyCode != 32) {
+                            moveTankByKeyPress(keyCode, idTank);
+                        } else
+                            shootTank(idTank);
+                    }
 		}
 	}
 
@@ -329,9 +332,9 @@ public class ViewBattlefield extends javax.swing.JFrame {
 		// encontra o tank e remove do panel
 		oldSQM = getSQMByTank(idTank);
 		if (oldSQM != null) {
-			if (adicionaTank(oldSQM, keyCode, idTank)) {
-				removeTank(oldSQM);
-			}
+                    if (adicionaTank(oldSQM, keyCode, idTank)) {
+                        removeTank(oldSQM);
+                    }
 		}
 	}
 
@@ -389,52 +392,52 @@ public class ViewBattlefield extends javax.swing.JFrame {
 		switch (keyCode) {
 		case 38:
 		case 87:
-			if (posY == 0)
-				return false;
+                    if (posY == 0)
+                        return false;
 
-			sqmAux = getSQM(posX, posY - 1);
-			matBattleField[posX][posY - 1] = idTank;
-			if(idTank == 1)
-				tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-um-norte.png")));
-			else tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-norte.png")));
-			tankTemp.setDirecao("norte");
-			break;
+                    sqmAux = getSQM(posX, posY - 1);
+                    matBattleField[posX][posY - 1] = idTank;
+                    if(idTank == 1)
+                        tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-um-norte.png")));
+                    else tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-norte.png")));
+                    tankTemp.setDirecao("norte");
+                    break;
 		case 39:
 		case 68:
-			if (matBattleField.length == (posX + 1))
-				return false;
+                    if (matBattleField.length == (posX + 1))
+                        return false;
 
-			sqmAux = getSQM(posX + 1, posY);
-			matBattleField[posX + 1][posY] = idTank;
-			if(idTank == 1)
-				tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-um-leste.png")));
-			else tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-leste.png")));
-			tankTemp.setDirecao("leste");
-			break;
+                    sqmAux = getSQM(posX + 1, posY);
+                    matBattleField[posX + 1][posY] = idTank;
+                    if(idTank == 1)
+                        tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-um-leste.png")));
+                    else tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-leste.png")));
+                    tankTemp.setDirecao("leste");
+                    break;
 		case 40:
 		case 83:
-			if (matBattleField[0].length == (posY + 1))
-				return false;
+                    if (matBattleField[0].length == (posY + 1))
+                        return false;
 
-			sqmAux = getSQM(posX, posY + 1);
-			matBattleField[posX][posY + 1] = idTank;
-			if(idTank == 1)
-				tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-um-sul.png")));
-			else tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-sul.png")));
-			tankTemp.setDirecao("sul");
-			break;
+                    sqmAux = getSQM(posX, posY + 1);
+                    matBattleField[posX][posY + 1] = idTank;
+                    if(idTank == 1)
+                        tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-um-sul.png")));
+                    else tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-sul.png")));
+                    tankTemp.setDirecao("sul");
+                    break;
 		case 65:
 		case 37:
-			if (posX == 0)
-				return false;
+                    if (posX == 0)
+                        return false;
 
-			sqmAux = getSQM(posX - 1, posY);
-			matBattleField[posX - 1][posY] = idTank;
-			if(idTank == 1)
-				tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-um-oeste.png")));
-			else tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-oeste.png")));
-			tankTemp.setDirecao("oeste");
-			break;
+                    sqmAux = getSQM(posX - 1, posY);
+                    matBattleField[posX - 1][posY] = idTank;
+                    if(idTank == 1)
+                        tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-um-oeste.png")));
+                    else tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-oeste.png")));
+                    tankTemp.setDirecao("oeste");
+                    break;
 		}
 
 		sqmAux.add(tankTemp);
@@ -444,49 +447,49 @@ public class ViewBattlefield extends javax.swing.JFrame {
 	}
 
 	private void shootTank(int idTank) {
-		new Thread() {
-			@Override
-			public void run() {
-				try {
-					shoot(idTank);
-				} catch (InterruptedException ex) {
-					Logger.getLogger(ViewBattlefield.class.getName()).log(Level.SEVERE, null, ex);
-				}
-			}
-		}.start();
+            new Thread() {
+                @Override
+                public void run() {
+                        try {
+                            shoot(idTank);
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(ViewBattlefield.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+            }.start();
 	}
 
 	private void shoot(int idTank) throws InterruptedException {
-		int[] posicao = null;
+            int[] posicao = null;
 
-		// encontra o tank para pegar a direcao
-		posicao = getSQMByTank(idTank);
-		JPanel sqmAux = getSQM(posicao[0], posicao[1]);
-		tank tankTemp;
-		tankTemp = (tank) sqmAux.getComponent(0);
+            // encontra o tank para pegar a direcao
+            posicao = getSQMByTank(idTank);
+            JPanel sqmAux = getSQM(posicao[0], posicao[1]);
+            tank tankTemp;
+            tankTemp = (tank) sqmAux.getComponent(0);
 
-		tankTemp.getDirecao();
+            tankTemp.getDirecao();
 
-		if (tankTemp.isShoot())
-			return;
-		else
-			tankTemp.setShoot(true);
+            if (tankTemp.isShoot())
+                return;
+            else
+                tankTemp.setShoot(true);
 
-		switch (tankTemp.getDirecao()) {
-		case "norte":
-			direcionaTiroNorte(sqmAux, posicao);
-			break;
-		case "sul":
-			direcionaTiroSul(sqmAux, posicao);
-			break;
-		case "leste":
-			direcionaTiroLeste(sqmAux, posicao);
-			break;
-		case "oeste":
-			direcionaTiroOeste(sqmAux, posicao);
-			break;
-		}
-		tankTemp.setShoot(false);
+            switch (tankTemp.getDirecao()) {
+                case "norte":
+                    direcionaTiroNorte(sqmAux, posicao);
+                    break;
+                case "sul":
+                    direcionaTiroSul(sqmAux, posicao);
+                    break;
+                case "leste":
+                    direcionaTiroLeste(sqmAux, posicao);
+                    break;
+                case "oeste":
+                    direcionaTiroOeste(sqmAux, posicao);
+                    break;
+            }
+            tankTemp.setShoot(false);
 	}
 
 	private void direcionaTiroNorte(JPanel sqmAux, int[] posicao) throws InterruptedException {
@@ -498,37 +501,37 @@ public class ViewBattlefield extends javax.swing.JFrame {
 		int aux = 1;
 
 		for (int i = posicao[1]; i > 0; i--) {
-			sqmAux = getSQM(posicao[0], posicao[1] - aux);
-			sqmAux.add(jShoot);
-			sqmAux.repaint();
+                    sqmAux = getSQM(posicao[0], posicao[1] - aux);
+                    sqmAux.add(jShoot);
+                    sqmAux.repaint();
 
-			Thread.sleep(70);
+                    Thread.sleep(70);
 
-			sqmAux.remove(jShoot);
-			sqmAux.repaint();
-			aux++;
+                    sqmAux.remove(jShoot);
+                    sqmAux.repaint();
+                    aux++;
 		}
 	}
 
 	private void direcionaTiroSul(JPanel sqmAux, int[] posicao) throws InterruptedException {
-		JPanel jShoot = new JPanel();
-		jShoot.setBackground(Color.red);
-		jShoot.setSize(4, 16);
-		jShoot.setLocation(12, 1);
+            JPanel jShoot = new JPanel();
+            jShoot.setBackground(Color.red);
+            jShoot.setSize(4, 16);
+            jShoot.setLocation(12, 1);
 
-		int aux = 1;
+            int aux = 1;
 
-		for (int i = posicao[1]; i < matBattleField[0].length - 1; i++) {
-			sqmAux = getSQM(posicao[0], posicao[1] + aux);
-			sqmAux.add(jShoot);
-			sqmAux.repaint();
+            for (int i = posicao[1]; i < matBattleField[0].length - 1; i++) {
+                sqmAux = getSQM(posicao[0], posicao[1] + aux);
+                sqmAux.add(jShoot);
+                sqmAux.repaint();
 
-			Thread.sleep(70);
+                Thread.sleep(70);
 
-			sqmAux.remove(jShoot);
-			sqmAux.repaint();
-			aux++;
-		}
+                sqmAux.remove(jShoot);
+                sqmAux.repaint();
+                aux++;
+            }
 	}
 
 	private void direcionaTiroLeste(JPanel sqmAux, int[] posicao) throws InterruptedException {
@@ -540,19 +543,19 @@ public class ViewBattlefield extends javax.swing.JFrame {
 		int aux = 1;
 
 		for (int i = posicao[0]; i < matBattleField.length - 1; i++) {
-			// verifica se o tiro acertou algum tank
-			if (verificaAcerto(posicao[0] + aux, posicao[1]))
-				break;
+                    // verifica se o tiro acertou algum tank
+                    if (verificaAcerto(posicao[0] + aux, posicao[1]))
+                            break;
 
-			sqmAux = getSQM(posicao[0] + aux, posicao[1]);
-			sqmAux.add(jShoot);
-			sqmAux.repaint();
+                    sqmAux = getSQM(posicao[0] + aux, posicao[1]);
+                    sqmAux.add(jShoot);
+                    sqmAux.repaint();
 
-			Thread.sleep(70);
+                    Thread.sleep(70);
 
-			sqmAux.remove(jShoot);
-			sqmAux.repaint();
-			aux++;
+                    sqmAux.remove(jShoot);
+                    sqmAux.repaint();
+                    aux++;
 		}
 	}
 
@@ -565,27 +568,27 @@ public class ViewBattlefield extends javax.swing.JFrame {
 		int aux = 1;
 
 		for (int i = posicao[0]; i > 0; i--) {
-			// verifica se o tiro acertou algum tank
-			if (verificaAcerto(posicao[0] - aux, posicao[1]))
-				break;
+                    // verifica se o tiro acertou algum tank
+                    if (verificaAcerto(posicao[0] - aux, posicao[1]))
+                            break;
 
-			sqmAux = getSQM(posicao[0] - aux, posicao[1]);
-			sqmAux.add(jShoot);
-			sqmAux.repaint();
+                    sqmAux = getSQM(posicao[0] - aux, posicao[1]);
+                    sqmAux.add(jShoot);
+                    sqmAux.repaint();
 
-			Thread.sleep(70);
+                    Thread.sleep(70);
 
-			sqmAux.remove(jShoot);
-			sqmAux.repaint();
-			aux++;
+                    sqmAux.remove(jShoot);
+                    sqmAux.repaint();
+                    aux++;
 		}
 	}
 
 	public boolean verificaAcerto(int posX, int posY) {
-		if (matBattleField[posX][posY] != 0) {
-			return true;
-		} else
-			return false;
+            if (matBattleField[posX][posY] != 0) {
+                return true;
+            } else
+                return false;
 	}
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
