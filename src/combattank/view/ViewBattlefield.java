@@ -252,7 +252,7 @@ public class ViewBattlefield extends javax.swing.JFrame {
 
 
 	private void sendData(int idTank, int keyCode){
-            if (idTank != 1){            
+            //if (idTank != 1){            
                 try {
                     PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socketClient.getOutputStream())),true);
                     out.println(Integer.toString(keyCode));
@@ -260,8 +260,7 @@ public class ViewBattlefield extends javax.swing.JFrame {
                     System.out.println("Ocorreu um erro esperado, mas n�o t�o esperado assim para tratarmos.");
                     e1.printStackTrace();
                 }
-            }
-            
+            //}            
 	}
 
 	private void moveTank(int idTank) {
