@@ -117,6 +117,7 @@ public class MainMenu {
                 public void actionPerformed(ActionEvent e) {
                     try {
                         servidor = new ServerSocket(10555,0,InetAddress.getByName(null));
+                        //servidor = new ServerSocket(10555);
                         //menuController.checkHosts();
                         //list.enableInputMethods(false);
                         ViewBattlefield teste = new ViewBattlefield(servidor);

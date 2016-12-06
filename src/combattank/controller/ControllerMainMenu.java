@@ -23,11 +23,27 @@ public class ControllerMainMenu {
     }
 
     public void checkHosts() {
+        String host = null;
+        
         serverList.clear();
         /*new Thread(){
         @Override
         public void run(){*/
         ExecutorService executor = Executors.newCachedThreadPool();	
+        
+        // TESTA LOCALHOST
+        try {
+            if (InetAddress.getByName(null).isReachable(3)) {
+                Socket newSock = new Socket(host, 10555);
+                serverList.add(newSock);
+            } else
+                System.out.println(" is NOT reachable");
+        } catch (UnknownHostException ex) {
+            Logger.getLogger(ipChecker.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(ipChecker.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         for (int i = 0; i <= 25; i++) {
             ipChecker r = new ipChecker("192.168.0", i * 10 + 1, i * 10 + 10);
             r.setList(serverList);
@@ -64,20 +80,6 @@ class ipChecker implements Runnable {
 	@Override
 	public void run() {
             String host = null;
-            
-            // TESTA LOCALHOST
-            try {
-                if (InetAddress.getByName(null).isReachable(3)) {
-                    System.out.println(host + " is reachable");
-                    Socket newSock = new Socket(host, 10555);
-                    serverList.add(newSock);
-                } else
-                    System.out.println(" is NOT reachable");
-            } catch (UnknownHostException ex) {
-                Logger.getLogger(ipChecker.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) {
-                Logger.getLogger(ipChecker.class.getName()).log(Level.SEVERE, null, ex);
-            }
             
             for (int ip = startingIp; ip <= endingIp; ip++) {
                 host = subnet + "." + ip;
