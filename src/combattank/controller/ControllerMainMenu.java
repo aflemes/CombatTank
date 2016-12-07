@@ -24,25 +24,22 @@ public class ControllerMainMenu {
 
     public void checkHosts() {
         String host = null;
-        
         serverList.clear();
-        /*new Thread(){
-        @Override
-        public void run(){*/
+        
         ExecutorService executor = Executors.newCachedThreadPool();	
         
         // TESTA LOCALHOST
         try {
             if (InetAddress.getByName(null).isReachable(3)) {
                 Socket newSock = new Socket(host, 10555);
-                serverList.add(newSock);
+                serverList.add(newSock);                
             } else
                 System.out.println(" is NOT reachable");
         } catch (UnknownHostException ex) {
             Logger.getLogger(ipChecker.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(ipChecker.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        }                  
         
         for (int i = 0; i <= 25; i++) {
             ipChecker r = new ipChecker("192.168.0", i * 10 + 1, i * 10 + 10);
@@ -53,7 +50,7 @@ public class ControllerMainMenu {
         r.setList(serverList);
                 executor.submit(r);*/
         try {
-            executor.awaitTermination(10, TimeUnit.SECONDS);
+            executor.awaitTermination(1, TimeUnit.SECONDS);
             menuView.list.setListData(serverList.toArray());
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block

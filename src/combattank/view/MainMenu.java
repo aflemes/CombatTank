@@ -3,17 +3,8 @@ package combattank.view;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
-import java.awt.GridBagLayout;
 import javax.swing.JButton;
-import java.awt.GridBagConstraints;
-import java.awt.Component;
-import javax.swing.Box;
-import java.awt.Insets;
-import java.awt.Dimension;
-import javax.swing.JTextArea;
-
 import combattank.controller.ControllerMainMenu;
-
 import javax.swing.JList;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -23,8 +14,6 @@ import java.awt.event.ActionEvent;
 import java.net.InetAddress;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
 

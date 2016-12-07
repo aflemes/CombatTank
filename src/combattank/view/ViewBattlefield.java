@@ -62,7 +62,6 @@ public class ViewBattlefield extends javax.swing.JFrame {
             initLifeBar();
             initBattleField();
             initClient();
-
             run();
 	}
         
@@ -185,7 +184,7 @@ public class ViewBattlefield extends javax.swing.JFrame {
             new Thread() {
                 @Override
                 public void run() {
-                        moveTank(1);
+                    moveTank(1);
                 }
             }.start();
 
@@ -242,51 +241,58 @@ public class ViewBattlefield extends javax.swing.JFrame {
             }.start();
 
             new Thread() {
-                    @Override
-                    public void run() {
-                        moveTank(2);
-                    }
+                @Override
+                public void run() {
+                    moveTank(2);
+                }
             }.start();
 
 	}
 
 
-	private void sendData(int idTank, int keyCode){
-            if (idTank != 1){            
-                try {
-                    PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socketClient.getOutputStream())),true);
-                    out.println(Integer.toString(keyCode));
-                } catch (IOException e1) {
-                    System.out.println("Ocorreu um erro esperado, mas n�o t�o esperado assim para tratarmos.");
-                    e1.printStackTrace();
+	private void sendData(int idTank, int keyCode){            
+            try {
+                PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socketClient.getOutputStream())),true);
+                if (keyCode == 35){
+                    out.println("idTank " + String.valueOf(idTank) + " take a hit");
                 }
+                else out.println(Integer.toString(keyCode));
+                
+            } catch (IOException e1) {
+                System.out.println("Ocorreu um erro esperado, mas n�o t�o esperado assim para tratarmos.");
+                e1.printStackTrace();
             }
-            
 	}
 
 	private void moveTank(int idTank) {
+            this.addKeyListener(new KeyListener() {
+                @Override
+                public void keyTyped(KeyEvent e) {
 
-		this.addKeyListener(new KeyListener() {
-                    @Override
-                    public void keyTyped(KeyEvent e) {
+                }
 
-                    }
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if (verificaVidas() == 0)  
+                        return;
+                    
+                    if (e.getKeyCode() != 32) {
+                        moveTankByKeyPress(e.getKeyCode(), idTank);
+                    } else
+                        shootTank(idTank);
 
-                    @Override
-                    public void keyPressed(KeyEvent e) {
-                        if (e.getKeyCode() != 32) {
-                            moveTankByKeyPress(e.getKeyCode(), idTank);
-                        } else
-                            shootTank(idTank);
+                    sendData(idTank, e.getKeyCode());
+                }
 
-                        sendData(idTank, e.getKeyCode());
-                    }
-
-                    @Override
-                    public void keyReleased(KeyEvent e) {
-                    }
-		});
+                @Override
+                public void keyReleased(KeyEvent e) {
+                }
+            });
 	}
+        
+        private int verificaVidas(){
+            return this.lifeBarAux.getQtdeLife();
+        }
 
 	private void receiveInputs(int idTank) throws IOException {
             int keyCode;
@@ -297,20 +303,28 @@ public class ViewBattlefield extends javax.swing.JFrame {
                     BufferedReader inFromClient = new BufferedReader(new InputStreamReader(socketClient.getInputStream()));
                     String received = inFromClient.readLine();
                     System.out.println(received);
-                    keyCode = Integer.parseInt(received);
+                    //keyCode = Integer.parseInt(received);
 
-                    if (keyCode != 32) {
-                        if (keyCode == 35){
+                    if (!received.equals("32")) {
+                        if (received.equals("idTank 1 take a hit")){
+                            
                             this.lifeBarAux.downlife();
                             
-                            if (this.lifeBarAux.getQtdeLife() == 0){
-                                System.out.println("GAME OVER");
-                            }
+                            System.out.println(" this.lifeBarAux.getQtdeLife() " + String.valueOf(this.lifeBarAux.getQtdeLife()));
+                            if (this.lifeBarAux.getQtdeLife() == 0)
+                                gameOver();
+                            
                         }
-                        else
-                            moveTankByKeyPress(keyCode, idTank);
+                        else{
+                                try{
+                                    keyCode = Integer.parseInt(received);
+                                }catch(Exception e){
+                                    keyCode = 0;
+                                }                                
+                                moveTankByKeyPress(keyCode, idTank);
+                            }
                     } else
-                        shootTank(idTank);
+                           shootTank(idTank);
                     /*
                      * if(inFromClient.readLine().equals(anObject);
                      * System.out.println("Received: " + clientSentence);
@@ -325,17 +339,26 @@ public class ViewBattlefield extends javax.swing.JFrame {
                     String received = inFromServer.readLine();
                     System.out.println(received);
                     
-                    keyCode = Integer.parseInt(received);
-                    if (keyCode != 32) {
-                        if (keyCode == 35){
+                    //keyCode = Integer.parseInt(received);
+                    if (!received.equals("32")) {
+                        if (received.equals("idTank 2 take a hit")){
+                            System.out.println("life down");
                             this.lifeBarAux.downlife();
                             
-                            if (this.lifeBarAux.getQtdeLife() == 0){
-                                System.out.println("GAME OVER");
-                            }
+                            System.out.println(" this.lifeBarAux.getQtdeLife() " + String.valueOf(this.lifeBarAux.getQtdeLife()));
+                            
+                            if (this.lifeBarAux.getQtdeLife() == 0)
+                                gameOver();
+                            
                         }
-                        else
-                            moveTankByKeyPress(keyCode, idTank);
+                        else{
+                                try{
+                                    keyCode = Integer.parseInt(received);
+                                }catch(Exception e){
+                                    keyCode = 0;
+                                }                                
+                                moveTankByKeyPress(keyCode, idTank);
+                            }
                     } else
                         shootTank(idTank);
                 }
@@ -621,6 +644,18 @@ public class ViewBattlefield extends javax.swing.JFrame {
             } else
                 return false;
 	}
+        
+        private void gameOver(){
+            gameOver jpGameOver = new gameOver();
+            jpGameOver.setSize(this.getWidth(), this.getHeight());
+            jpGameOver.setLocation(0, 0);
+            jpGameOver.setVisible(true);            
+            jpGameOver.setBackground(new Color(0,0,0,125));
+           
+            this.add(jpGameOver);
+            this.repaint();
+            this.setComponentZOrder(jpGameOver, 0);
+        }
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	// End of variables declaration//GEN-END:variables
