@@ -42,6 +42,7 @@ public class ViewBattlefield extends javax.swing.JFrame {
 	private Socket socketClient;
         private boolean lgServidor = false;
 	private boolean ready;
+        private gameOver jpGameOver;
 
 	public ViewBattlefield(ServerSocket server) {
             System.out.println("Servidor - " + server.toString());
@@ -51,6 +52,8 @@ public class ViewBattlefield extends javax.swing.JFrame {
             initLifeBar();
             initBattleField();
             initServer();
+            initGameOver();
+            initVictory();
             run();
 	}
 
@@ -62,6 +65,8 @@ public class ViewBattlefield extends javax.swing.JFrame {
             initLifeBar();
             initBattleField();
             initClient();
+            initGameOver(); 
+            initVictory();
             run();
 	}
         
@@ -312,7 +317,7 @@ public class ViewBattlefield extends javax.swing.JFrame {
                             
                             System.out.println(" this.lifeBarAux.getQtdeLife() " + String.valueOf(this.lifeBarAux.getQtdeLife()));
                             if (this.lifeBarAux.getQtdeLife() == 0)
-                                gameOver();
+                                this.jpGameOver.setVisible(true);
                             
                         }
                         else{
@@ -348,7 +353,7 @@ public class ViewBattlefield extends javax.swing.JFrame {
                             System.out.println(" this.lifeBarAux.getQtdeLife() " + String.valueOf(this.lifeBarAux.getQtdeLife()));
                             
                             if (this.lifeBarAux.getQtdeLife() == 0)
-                                gameOver();
+                                this.jpGameOver.setVisible(true);
                             
                         }
                         else{
@@ -645,16 +650,20 @@ public class ViewBattlefield extends javax.swing.JFrame {
                 return false;
 	}
         
-        private void gameOver(){
-            gameOver jpGameOver = new gameOver();
+        private void initGameOver(){
+            jpGameOver = new gameOver();
             jpGameOver.setSize(this.getWidth(), this.getHeight());
             jpGameOver.setLocation(0, 0);
-            jpGameOver.setVisible(true);            
+            jpGameOver.setVisible(false);            
             jpGameOver.setBackground(new Color(0,0,0,125));
            
             this.add(jpGameOver);
             this.repaint();
             this.setComponentZOrder(jpGameOver, 0);
+        }
+        
+        private void initVictory(){
+            
         }
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
