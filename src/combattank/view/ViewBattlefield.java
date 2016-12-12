@@ -177,7 +177,16 @@ public class ViewBattlefield extends javax.swing.JFrame {
                         sendData(tcpTransfTemp,qtdePlayers - 1);
                         
                         //
-                        addTankTo();
+                        addTankTo(qtdePlayers);
+                        
+                        //SINCRONIZA COM TODAS INSTANCIAS                        
+                        for (int i = 1; i < qtdePlayers; i++) {
+                            tcpTransfTemp = new modelTCPTransf();
+                            tcpTransfTemp.setAcao("add");
+                            tcpTransfTemp.setIdTank(qtdePlayers);
+                            
+                            sendData(tcpTransfTemp,i);                            
+                        }
                     }
                 }
             }.start();
@@ -275,7 +284,7 @@ public class ViewBattlefield extends javax.swing.JFrame {
                 public void keyPressed(KeyEvent e) {
                     modelTCPTransf tcpTransfer;
                     
-                    if (verificaVidas() == 0)  
+                    if (verificaVidas() <= 0)  
                         return;
                     
                     if (e.getKeyCode() != 32) {
@@ -285,7 +294,7 @@ public class ViewBattlefield extends javax.swing.JFrame {
 
                     
                     tcpTransfer = new modelTCPTransf();
-                    tcpTransfer.setAcao("Mov");
+                    tcpTransfer.setAcao("mov");
                     tcpTransfer.setIdTank(idTankReal);
                     System.out.println(" idTank moveTank " + String.valueOf(idTankReal));
                     tcpTransfer.setKeyCode(e.getKeyCode());
@@ -358,28 +367,34 @@ public class ViewBattlefield extends javax.swing.JFrame {
             
             switch(tcpTransfTemp.getAcao()){
                 case "Hit":
-                    if (tcpTransfTemp.getIdTank() != idTank){
+                    if (tcpTransfTemp.getIdTank() == idTankReal){
                         this.lifeBarAux.downlife();
 
                         if (this.lifeBarAux.getQtdeLife() == 0){
-                            faleci(idTank);
+                            faleci(idTankReal);
                             this.jpGameOver.setVisible(true);
                         }
                     }
                     break;
-                case "Add":
-                    if (tcpTransfTemp.getAcao().equals("Add"))
-                        addTankTo();
+                case "add":                    
+                    addTankTo(tcpTransfTemp.getIdTank());
                     break;
                 case "sync":
                     idTankReal = tcpTransfTemp.getIdTank();
-                    //cria thread move tank
-                    System.out.println(" idTank sync " + String.valueOf(idTankReal));
+                    //cria thread move tank                    
                     atribuiMoveTank(idTankReal);
 
                     addTank(tcpTransfTemp);
                     break;
-                default:
+                case "mov":
+                    //envia para todas os sockets
+                    if (socketServidor != null)
+                        for (int i = 1; i < qtdePlayers; i++) {
+                            sendData(tcpTransfTemp, i);
+                        }
+                    if (tcpTransfTemp.getIdTank() == idTankReal)
+                        break;
+                    
                     keyCode = tcpTransfTemp.getKeyCode();
                     idTank = tcpTransfTemp.getIdTank();
                     
@@ -388,6 +403,9 @@ public class ViewBattlefield extends javax.swing.JFrame {
                     else
                         shootTank(idTank);   
                     break;
+                default:
+                    break;
+                    
             }
             
             lgEscutou = true;
@@ -435,7 +453,7 @@ public class ViewBattlefield extends javax.swing.JFrame {
             return null;
 	}
         
-        private void addTankTo(){
+        private void addTankTo(int qtdePlayersTemp){
             tank tankTemp = new tank();
             
             JPanel sqmAux = null;
@@ -443,7 +461,9 @@ public class ViewBattlefield extends javax.swing.JFrame {
             tankTemp.setSize(25, 25);
             tankTemp.setLocation(2, 2);
         
-            for (int i = 1; i < qtdePlayers; i++) {
+            for (int i = 1; i < qtdePlayersTemp; i++) {
+                if (i + 1 == idTankReal)
+                    continue;
                 
                 switch (i + 1) {
                     case 2:
@@ -535,6 +555,9 @@ public class ViewBattlefield extends javax.swing.JFrame {
             case 87:
                 if (posY == 0)
                     return false;
+                else
+                    if (matBattleField[posX][posY - 1] != 0)
+                        return false;
 
                 sqmAux = getSQM(posX, posY - 1);
                 matBattleField[posX][posY - 1] = idTank;
@@ -562,6 +585,9 @@ public class ViewBattlefield extends javax.swing.JFrame {
             case 68:
                 if (matBattleField.length == (posX + 1))
                     return false;
+                else
+                    if (matBattleField[posX + 1][posY] != 0)
+                        return false;
 
                 sqmAux = getSQM(posX + 1, posY);
                 matBattleField[posX + 1][posY] = idTank;
@@ -588,6 +614,9 @@ public class ViewBattlefield extends javax.swing.JFrame {
             case 83:
                 if (matBattleField[0].length == (posY + 1))
                     return false;
+                else
+                    if (matBattleField[posX][posY + 1] != 0)
+                        return false;
 
                 sqmAux = getSQM(posX, posY + 1);
                 matBattleField[posX][posY + 1] = idTank;
@@ -614,6 +643,9 @@ public class ViewBattlefield extends javax.swing.JFrame {
             case 37:
                 if (posX == 0)
                     return false;
+                else
+                    if (matBattleField[posX - 1][posY] != 0)
+                        return false;
 
                 sqmAux = getSQM(posX - 1, posY);
                 matBattleField[posX - 1][posY] = idTank;
@@ -704,6 +736,10 @@ public class ViewBattlefield extends javax.swing.JFrame {
             int aux = 1;
 
             for (int i = posicao[1]; i > 0; i--) {
+                // verifica se o tiro acertou algum tank
+                if (verificaAcerto(posicao[0], posicao[1] - aux))
+                    break;
+                
                 sqmAux = getSQM(posicao[0], posicao[1] - aux);
                 sqmAux.add(jShoot);
                 sqmAux.repaint();
@@ -725,6 +761,9 @@ public class ViewBattlefield extends javax.swing.JFrame {
             int aux = 1;
 
             for (int i = posicao[1]; i < matBattleField[0].length - 1; i++) {
+                // verifica se o tiro acertou algum tank
+                if (verificaAcerto(posicao[0], posicao[1] + aux))
+                    break;
                 sqmAux = getSQM(posicao[0], posicao[1] + aux);
                 sqmAux.add(jShoot);
                 sqmAux.repaint();
@@ -748,7 +787,7 @@ public class ViewBattlefield extends javax.swing.JFrame {
             for (int i = posicao[0]; i < matBattleField.length - 1; i++) {
                 // verifica se o tiro acertou algum tank
                 if (verificaAcerto(posicao[0] + aux, posicao[1]))
-                        break;
+                    break;
 
                 sqmAux = getSQM(posicao[0] + aux, posicao[1]);
                 sqmAux.add(jShoot);
@@ -795,7 +834,10 @@ public class ViewBattlefield extends javax.swing.JFrame {
                 tcpTransfer.setAcao("Hit");
                 tcpTransfer.setIdTank(matBattleField[posX][posY]);               
                 
-                sendData(tcpTransfer,1);
+                if (matBattleField[posX][posY] == 1)
+                    sendData(tcpTransfer,(matBattleField[posX][posY]));
+                else
+                    sendData(tcpTransfer,(matBattleField[posX][posY]) - 1);
                 return true;
             } else
                 return false;
