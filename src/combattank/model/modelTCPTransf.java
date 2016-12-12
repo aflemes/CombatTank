@@ -15,7 +15,7 @@ public class modelTCPTransf implements Serializable{
     private String acao;
     private int idTank;   
     private int keyCode;
-
+    
     public int getKeyCode() {
         return keyCode;
     }

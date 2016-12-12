@@ -111,18 +111,6 @@ public class MainMenu {
                         //list.enableInputMethods(false);
                         ViewBattlefield teste = new ViewBattlefield(servidor);
                         teste.setVisible(true);
-                        
-                         new Thread() {
-                            @Override
-                            public void run() {
-                                try {
-                                    servidor.accept();
-                                } catch (IOException ex) {
-                                    Logger.getLogger(MainMenu.class.getName()).log(Level.SEVERE, null, ex);
-                                }
-                            }
-                        }.start();
-                        
                     } catch (IOException e1) {
                         // TODO Auto-generated catch block
                         e1.printStackTrace();

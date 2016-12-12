@@ -7,19 +7,11 @@
  */
 package combattank.view;
 
-import combattank.controller.*;
 import componente.*;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Level;
@@ -42,16 +34,18 @@ public class ViewBattlefield extends javax.swing.JFrame {
 	private battleField campoBatalha;
 	private lifeBar lifeBarAux;
 	private ServerSocket socketServidor;
-	private Socket socketClient;
-	private boolean ready;
+	private transient Socket socketClient[];
+	private int qtdePlayers = 1;
         private gameOver jpGameOver;
         private victory jpVictory;
+        private boolean lgEscutou;
+        private int idTankReal;
 
 	public ViewBattlefield(ServerSocket server) {
             System.out.println("Servidor - " + server.toString());
             socketServidor = server;
+            
             initComponents();
-            initLifeBar();
             initBattleField();
             initServer();
             initGameOver();
@@ -61,9 +55,11 @@ public class ViewBattlefield extends javax.swing.JFrame {
 
 	public ViewBattlefield(Socket client) {
             System.out.println("Client - " + client.toString());
-            socketClient = client;            
+            
+            socketClient = new Socket[4];
+            socketClient[1] = client;            
+            
             initComponents();
-            initLifeBar();
             initBattleField();
             initClient();
             initGameOver(); 
@@ -97,51 +93,6 @@ public class ViewBattlefield extends javax.swing.JFrame {
 		pack();
 	}// </editor-fold>//GEN-END:initComponents
 
-	/**
-	 * @param args
-	 *            the command line arguments
-	 */
-	// public static void main(String args[]) {
-	// /* Set the Nimbus look and feel */
-	// //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code
-	// (optional) ">
-	// /* If Nimbus (introduced in Java SE 6) is not available, stay with the
-	// default look and feel.
-	// * For details see
-	// http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
-	// */
-	// try {
-	// for (javax.swing.UIManager.LookAndFeelInfo info :
-	// javax.swing.UIManager.getInstalledLookAndFeels()) {
-	// if ("Nimbus".equals(info.getName())) {
-	// javax.swing.UIManager.setLookAndFeel(info.getClassName());
-	// break;
-	// }
-	// }
-	// } catch (ClassNotFoundException ex) {
-	// java.util.logging.Logger.getLogger(ViewBattlefield.class.getName()).log(java.util.logging.Level.SEVERE,
-	// null, ex);
-	// } catch (InstantiationException ex) {
-	// java.util.logging.Logger.getLogger(ViewBattlefield.class.getName()).log(java.util.logging.Level.SEVERE,
-	// null, ex);
-	// } catch (IllegalAccessException ex) {
-	// java.util.logging.Logger.getLogger(ViewBattlefield.class.getName()).log(java.util.logging.Level.SEVERE,
-	// null, ex);
-	// } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-	// java.util.logging.Logger.getLogger(ViewBattlefield.class.getName()).log(java.util.logging.Level.SEVERE,
-	// null, ex);
-	// }
-	// //</editor-fold>
-	// //</editor-fold>
-	//
-	// /* Create and display the form */
-	// java.awt.EventQueue.invokeLater(new Runnable() {
-	// public void run() {
-	// new ViewBattlefield().setVisible(true);
-	// }
-	// });
-	// }
-
 	private void initLifeBar() {
             lifeBarAux = new lifeBar();
             lifeBarAux.setQtdeLife(3); // 3 vidas
@@ -152,13 +103,18 @@ public class ViewBattlefield extends javax.swing.JFrame {
 	}
 
 	private void initBattleField() {
+            initField();
+            initLifeBar();
+	}
+        
+        private void initField(){
             campoBatalha = new battleField();
             campoBatalha.setLocation(50, 100);
             campoBatalha.setSize(500, 500);
             campoBatalha.setVisible(true);
             matBattleField = campoBatalha.getMatBattleField();
             this.add(campoBatalha);
-	}
+        }
 
 	private void initServer() {
             // controllerTank tank = new controllerTank();
@@ -175,40 +131,79 @@ public class ViewBattlefield extends javax.swing.JFrame {
             matBattleField[0][4] = 1;
 
             sqmAux.add(tankTemp);
-
-            tankTemp = new tank();
-            tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-oeste.png")));
-            tankTemp.setSize(25, 25);
-            tankTemp.setLocation(2, 2);
-
-            sqmAux = getSQM(11, 4);
-            matBattleField[11][4] = 2;
-
-            sqmAux.add(tankTemp);
             sqmAux.repaint();
 
+            // CODIGO DO SERVIDOR
+            idTankReal  = 1;
+            
             new Thread() {
                 @Override
                 public void run() {
-                    moveTank(1);
+                    moveTank(idTankReal);
                 }
             }.start();
 
             new Thread() {
                 @Override
                 public void run() {
-                    try {
-                        receiveInputs(2);
-                    } catch (IOException e) {
-                        System.out.println("Ocorreu um erro esperado, mas n�o t�o esperado assim para tratarmos.");
-                        e.printStackTrace();
+                    modelTCPTransf tcpTransfTemp;
+                    
+                    socketClient = new Socket[4];
+                    
+                    while (true){
+                        //aceita as conexoes no servidor
+                        try {
+                            socketClient[qtdePlayers] = socketServidor.accept();
+                        } catch (IOException ex) {
+                            Logger.getLogger(ViewBattlefield.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        qtdePlayers++;
+                        System.out.println(" aceitei a conexao ");
+
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                try {
+                                    listenerServer(qtdePlayers - 1);
+                                } catch (IOException ex) {}
+                            }
+                        }.start();
+                        
+                        
+                        tcpTransfTemp = new modelTCPTransf();
+                        tcpTransfTemp.setAcao("sync");
+                        tcpTransfTemp.setIdTank(qtdePlayers);
+                        //
+                        sendData(tcpTransfTemp,qtdePlayers - 1);
+                        
+                        //
+                        addTankTo();
                     }
                 }
             }.start();
 	}
+        
+        private void listenerServer(int indice) throws IOException{
+            modelTCPTransf tcpTemp = null;
+
+            while (true){
+                ObjectInputStream clientInputStream;
+                clientInputStream = new ObjectInputStream(socketClient[indice].getInputStream());
+
+                try {
+                    tcpTemp = (modelTCPTransf)clientInputStream.readObject();                    
+                } catch (ClassNotFoundException ex) {
+                    //Logger.getLogger(ViewBattlefield.class.getName()).log(Level.SEVERE, null, ex);
+                }   
+                
+                trataRetorno(tcpTemp,1);
+            }
+            
+        }
 
 	private void initClient() {
-            // controllerTank tank = new controllerTank();
+            int idTank = 0;
+            
             tank tankTemp;
             JPanel sqmAux;
             tankTemp = new tank();
@@ -221,51 +216,52 @@ public class ViewBattlefield extends javax.swing.JFrame {
             matBattleField[0][4] = 1;
 
             sqmAux.add(tankTemp);
-
-            tankTemp = new tank();
-            tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-oeste.png")));
-            tankTemp.setSize(25, 25);
-            tankTemp.setLocation(2, 2);
-
-            sqmAux = getSQM(11, 4);
-            matBattleField[11][4] = 2;
-
-            sqmAux.add(tankTemp);
             sqmAux.repaint();
-
+            
+            try {
+                getIdTank();
+            } catch (IOException ex) {
+                Logger.getLogger(ViewBattlefield.class.getName()).log(Level.SEVERE, null, ex);
+            }
 
             new Thread() {
                 @Override
                 public void run() {
                     try {
-                        receiveInputs(1);
+                        receiveInputs(idTankReal);
                     } catch (IOException e) {
                         System.out.println("Ocorreu um erro esperado, mas n�o t�o esperado assim para tratarmos.");
                         e.printStackTrace();
                     }
                 }
             }.start();
-
-            new Thread() {
-                @Override
-                public void run() {
-                    moveTank(2);
-                }
-            }.start();
-
 	}
+        
+        private void getIdTank() throws IOException{
+            modelTCPTransf tcpTransfTemp = null;
+            ObjectInputStream clientInputStream = new ObjectInputStream(socketClient[1].getInputStream());
 
-
-	private void sendData(modelTCPTransf tcpTransfTemp){
-            if (socketClient == null)
+            try {
+                tcpTransfTemp = (modelTCPTransf)clientInputStream.readObject();                    
+            } catch (ClassNotFoundException ex) {
+                //Logger.getLogger(ViewBattlefield.class.getName()).log(Level.SEVERE, null, ex);
+            }                
+            
+            trataRetorno(tcpTransfTemp, idTankReal);
+        }
+	
+        private void sendData(modelTCPTransf tcpTransfTemp,int indice){
+            if (socketClient[indice] == null)
                 return;
+            
+            System.out.println(" [indice] " + String.valueOf(indice));
                 
             try {
-                ObjectOutputStream clientOutputStream = new ObjectOutputStream(socketClient.getOutputStream());
+                ObjectOutputStream clientOutputStream = new ObjectOutputStream(socketClient[indice].getOutputStream());
                 clientOutputStream.writeObject(tcpTransfTemp);
-             } catch (IOException e1) {                    
+            } catch (IOException e1) {                    
                 e1.printStackTrace();
-            }          
+            }
 	}
 
 	private void moveTank(int idTank) {
@@ -278,7 +274,7 @@ public class ViewBattlefield extends javax.swing.JFrame {
                 @Override
                 public void keyPressed(KeyEvent e) {
                     modelTCPTransf tcpTransfer;
-                                   
+                    
                     if (verificaVidas() == 0)  
                         return;
                     
@@ -287,12 +283,23 @@ public class ViewBattlefield extends javax.swing.JFrame {
                     } else
                         shootTank(idTank);
 
+                    
                     tcpTransfer = new modelTCPTransf();
                     tcpTransfer.setAcao("Mov");
-                    tcpTransfer.setIdTank(idTank);
+                    tcpTransfer.setIdTank(idTankReal);
+                    System.out.println(" idTank moveTank " + String.valueOf(idTankReal));
                     tcpTransfer.setKeyCode(e.getKeyCode());
                     
-                    sendData(tcpTransfer);
+                    if (socketServidor == null){
+                        //ALWAYS SEND TO THE SERVER
+                        sendData(tcpTransfer,1);
+                    }
+                    else{
+                        for (int i = 1; i < qtdePlayers; i++) {
+                            System.out.println(" oi ");
+                            sendData(tcpTransfer,i);
+                        }
+                    }
                 }
 
                 @Override
@@ -301,52 +308,107 @@ public class ViewBattlefield extends javax.swing.JFrame {
             });
 	}
         
-        private int verificaVidas(){
-            return this.lifeBarAux.getQtdeLife();
-        }
-
-	private void receiveInputs(int idTank) throws IOException {
-            int keyCode;
+        private void receiveInputs(int idTank) throws IOException {
+            int keyCode,idTankTemp;
             modelTCPTransf tcpTransfTemp = null;
-        
-            if (idTank != 1)
-                socketClient = socketServidor.accept();            
+            ObjectInputStream clientInputStream = null;
             
             while (true) {
-                ObjectInputStream clientInputStream = new ObjectInputStream(socketClient.getInputStream());
-                
+                clientInputStream = new ObjectInputStream(socketClient[1].getInputStream());
+
                 try {
                     tcpTransfTemp = (modelTCPTransf)clientInputStream.readObject();                    
                 } catch (ClassNotFoundException ex) {
                     //Logger.getLogger(ViewBattlefield.class.getName()).log(Level.SEVERE, null, ex);
                 }                
-                
-                if (tcpTransfTemp.getAcao().equals("Hit")){
+                System.out.println(" getAcao() " + String.valueOf(tcpTransfTemp.getAcao()));
+                System.out.println(" getIdTank() " + String.valueOf(tcpTransfTemp.getIdTank()));
+
+                trataRetorno(tcpTransfTemp, tcpTransfTemp.getIdTank());
+            }
+	}
+        
+        private void addListenerSocket(int indice){
+            new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        listenerSocket(indice);
+                    } catch (IOException ex) {
+                        Logger.getLogger(ViewBattlefield.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (ClassNotFoundException ex) {
+                        Logger.getLogger(ViewBattlefield.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }.start();
+        }
+        
+        private void listenerSocket(int indice) throws IOException, ClassNotFoundException{
+            modelTCPTransf tcpTransfTemp;
+            
+            ObjectInputStream clientInputStream = new ObjectInputStream(socketClient[indice].getInputStream());
+            
+            tcpTransfTemp = (modelTCPTransf)clientInputStream.readObject();
+            
+            trataRetorno(tcpTransfTemp, 2);
+        }
+        
+        private void trataRetorno(modelTCPTransf tcpTransfTemp, int idTank){
+            int keyCode;
+            
+            switch(tcpTransfTemp.getAcao()){
+                case "Hit":
                     if (tcpTransfTemp.getIdTank() != idTank){
                         this.lifeBarAux.downlife();
-                    
+
                         if (this.lifeBarAux.getQtdeLife() == 0){
                             faleci(idTank);
                             this.jpGameOver.setVisible(true);
                         }
                     }
-                }                                        
-                else{ 
-                    keyCode = tcpTransfTemp.getKeyCode();
+                    break;
+                case "Add":
+                    if (tcpTransfTemp.getAcao().equals("Add"))
+                        addTankTo();
+                    break;
+                case "sync":
+                    idTankReal = tcpTransfTemp.getIdTank();
+                    //cria thread move tank
+                    System.out.println(" idTank sync " + String.valueOf(idTankReal));
+                    atribuiMoveTank(idTankReal);
 
+                    addTank(tcpTransfTemp);
+                    break;
+                default:
+                    keyCode = tcpTransfTemp.getKeyCode();
+                    idTank = tcpTransfTemp.getIdTank();
+                    
                     if (keyCode != 32)                        
                         moveTankByKeyPress(keyCode, idTank);                        
                     else
                         shootTank(idTank);   
-                }
-                
+                    break;
             }
-	}
+            
+            lgEscutou = true;
+            synchronized (this){
+                this.notify();
+            }
+        }
+        
+        private void atribuiMoveTank(int idTank){
+            new Thread() {
+                @Override
+                public void run() {
+                    moveTank(idTank);
+                }
+            }.start();
+        }
 
 	private void moveTankByKeyPress(int keyCode, int idTank) {
             int[] oldSQM = null;
             int xAux, yAux;
-
+            
             // encontra o tank e remove do panel
             oldSQM = getSQMByTank(idTank);
             if (oldSQM != null) {
@@ -358,21 +420,81 @@ public class ViewBattlefield extends javax.swing.JFrame {
 
 	// procura no campo de batalha o jpanel com o nome correspondente
 	private SQM getSQM(int x, int y) {
-		SQM sqmAux = new SQM();
+            SQM sqmAux = new SQM();
 
-		for (int i = 0; i < campoBatalha.getComponentCount(); i++) {
-                    try {
-                        sqmAux = (SQM) campoBatalha.getComponent(i);
-                    } catch (Exception E) {
-                    }
+            for (int i = 0; i < campoBatalha.getComponentCount(); i++) {
+                try {
+                    sqmAux = (SQM) campoBatalha.getComponent(i);
+                } catch (Exception E) {
+                }
 
-                    if (sqmAux.getPosX() == x && sqmAux.getPosY() == y)
-                        return (SQM) campoBatalha.getComponent(i);
-		}
+                if (sqmAux.getPosX() == x && sqmAux.getPosY() == y)
+                    return (SQM) campoBatalha.getComponent(i);
+            }
 
-		return null;
+            return null;
 	}
+        
+        private void addTankTo(){
+            tank tankTemp = new tank();
+            
+            JPanel sqmAux = null;
+            
+            tankTemp.setSize(25, 25);
+            tankTemp.setLocation(2, 2);
+        
+            for (int i = 1; i < qtdePlayers; i++) {
+                
+                switch (i + 1) {
+                    case 2:
+                        tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-oeste.png")));
+                        sqmAux = getSQM(11, 4);
+                        matBattleField[11][4] = 2;
+                        break;
+                    case 3:
+                        tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-tres-sul.png")));
+                        sqmAux = getSQM(6, 0);
+                        matBattleField[6][0] = 3;
+                        break;
+                    case 4:
+                        tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-quatro-norte.png")));
+                        sqmAux = getSQM(6, 11);
+                        matBattleField[6][11] = 4;
+                        break;
+                }
+                sqmAux.add(tankTemp);
+                sqmAux.repaint();
+            }
+        }
 
+        private void addTank(modelTCPTransf tcpTransfTemp){
+            tank tankTempComponente = new tank();
+            JPanel sqmAux = null;
+            
+            tankTempComponente.setSize(25, 25);
+            tankTempComponente.setLocation(2, 2);
+            
+            switch (tcpTransfTemp.getIdTank()){
+                case 2:
+                    tankTempComponente.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-oeste.png")));
+                    sqmAux = getSQM(11, 4);
+                    matBattleField[11][4] = 2;
+                    break;
+                case 3:
+                    tankTempComponente.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-tres-sul.png")));
+                    sqmAux = getSQM(6, 0);
+                    matBattleField[6][0] = 3;
+                    break;
+                case 4:
+                    tankTempComponente.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-quatro-norte.png")));
+                    sqmAux = getSQM(6, 11);
+                    matBattleField[6][11] = 4;
+                    break;
+                }
+                sqmAux.add(tankTempComponente);
+                sqmAux.repaint();
+        }
+       
 	private int[] getSQMByTank(int idTank) {
             int[] retorno = new int[2];
 
@@ -390,12 +512,12 @@ public class ViewBattlefield extends javax.swing.JFrame {
 	}
 
 	private void removeTank(int[] oldSQM) {
-		JPanel jPanelAux;
-		jPanelAux = getSQM(oldSQM[0], oldSQM[1]);
-		// remove tank do campo de batalha
-		matBattleField[oldSQM[0]][oldSQM[1]] = 0;
-		jPanelAux.removeAll();
-		jPanelAux.repaint();
+            JPanel jPanelAux;
+            jPanelAux = getSQM(oldSQM[0], oldSQM[1]);
+            // remove tank do campo de batalha
+            matBattleField[oldSQM[0]][oldSQM[1]] = 0;
+            jPanelAux.removeAll();
+            jPanelAux.repaint();
 	}
 
 	private boolean adicionaTank(int[] oldSQM, int keyCode, int idTank) {
@@ -407,7 +529,7 @@ public class ViewBattlefield extends javax.swing.JFrame {
             tank tankTemp = new tank();
             tankTemp.setSize(25, 25);
             tankTemp.setLocation(2, 2);
-
+            
             switch (keyCode) {
             case 38:
             case 87:
@@ -416,9 +538,22 @@ public class ViewBattlefield extends javax.swing.JFrame {
 
                 sqmAux = getSQM(posX, posY - 1);
                 matBattleField[posX][posY - 1] = idTank;
-                if(idTank == 1)
-                    tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-um-norte.png")));
-                else tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-norte.png")));
+                
+                switch (idTank){
+                    case 1:
+                        tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-um-norte.png")));
+                        break;
+                    case 2:
+                        tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-norte.png")));
+                        break;
+                    case 3:
+                        tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-tres-norte.png")));
+                        break;
+                    case 4:
+                        tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-quatro-norte.png")));
+                        break;
+                }
+                
                 tankTemp.setDirecao("norte");
                 
                 lgAlterou = true;
@@ -430,9 +565,21 @@ public class ViewBattlefield extends javax.swing.JFrame {
 
                 sqmAux = getSQM(posX + 1, posY);
                 matBattleField[posX + 1][posY] = idTank;
-                if(idTank == 1)
-                    tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-um-leste.png")));
-                else tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-leste.png")));
+                switch (idTank){
+                    case 1:
+                        tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-um-leste.png")));
+                        break;
+                    case 2:
+                        tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-leste.png")));
+                        break;
+                    case 3:
+                        tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-tres-leste.png")));
+                        break;
+                    case 4:
+                        tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-quatro-leste.png")));
+                        break;
+                }
+                
                 tankTemp.setDirecao("leste");
                 
                 lgAlterou = true;
@@ -444,9 +591,21 @@ public class ViewBattlefield extends javax.swing.JFrame {
 
                 sqmAux = getSQM(posX, posY + 1);
                 matBattleField[posX][posY + 1] = idTank;
-                if(idTank == 1)
-                    tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-um-sul.png")));
-                else tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-sul.png")));
+                switch (idTank){
+                    case 1:
+                        tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-um-sul.png")));
+                        break;
+                    case 2:
+                        tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-sul.png")));
+                        break;
+                    case 3:
+                        tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-tres-sul.png")));
+                        break;
+                    case 4:
+                        tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-quatro-sul.png")));
+                        break;
+                }
+                        
                 tankTemp.setDirecao("sul");
                 
                 lgAlterou = true;
@@ -458,9 +617,22 @@ public class ViewBattlefield extends javax.swing.JFrame {
 
                 sqmAux = getSQM(posX - 1, posY);
                 matBattleField[posX - 1][posY] = idTank;
-                if(idTank == 1)
-                    tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-um-oeste.png")));
-                else tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-oeste.png")));
+                
+                switch (idTank){
+                    case 1:
+                        tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-um-oeste.png")));
+                        break;
+                    case 2:
+                        tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-oeste.png")));
+                        break;
+                    case 3:
+                        tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-tres-oeste.png")));
+                        break;
+                    case 4:
+                        tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-quatro-oeste.png")));
+                        break;
+                }
+                
                 tankTemp.setDirecao("oeste");
                 
                 lgAlterou = true;
@@ -623,7 +795,7 @@ public class ViewBattlefield extends javax.swing.JFrame {
                 tcpTransfer.setAcao("Hit");
                 tcpTransfer.setIdTank(matBattleField[posX][posY]);               
                 
-                sendData(tcpTransfer);
+                sendData(tcpTransfer,1);
                 return true;
             } else
                 return false;
@@ -658,9 +830,13 @@ public class ViewBattlefield extends javax.swing.JFrame {
             tcpTransfer.setAcao("Death");
             tcpTransfer.setIdTank(idTank);            
 
-            sendData(tcpTransfer);
+            sendData(tcpTransfer,1);
         }
-
-	// Variables declaration - do not modify//GEN-BEGIN:variables
+        
+        private int verificaVidas(){
+            return this.lifeBarAux.getQtdeLife();
+        }
+        
+        // Variables declaration - do not modify//GEN-BEGIN:variables
 	// End of variables declaration//GEN-END:variables
 }

@@ -5,11 +5,13 @@
  */
 package componente;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Allan
  */
-public class tank extends javax.swing.JLabel{
+public class tank extends javax.swing.JLabel implements Serializable{
     private String direcao;
     private boolean shoot;
 

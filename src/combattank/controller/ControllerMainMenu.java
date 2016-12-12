@@ -86,8 +86,7 @@ class ipChecker implements Runnable {
                         Socket newSock = new Socket(host, 10555);
                         serverList.add(newSock);
                         //Socket socketClient = new Socket(host, 10555);
-                    } else
-                            System.out.println(host + " is NOT reachable");
+                    }
                 } catch (UnknownHostException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
