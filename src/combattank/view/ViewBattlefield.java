@@ -469,18 +469,23 @@ public class ViewBattlefield extends javax.swing.JFrame {
 	}
         
         private void addTankTo(int qtdePlayersTemp){
-            tank tankTemp = new tank();
+            tank tankTemp = null;
             
             JPanel sqmAux = null;
             
-            tankTemp.setSize(25, 25);
-            tankTemp.setLocation(2, 2);
-        
-            for (int i = 1; i < qtdePlayersTemp; i++) {
-                if (i + 1 == idTankReal)
+            for (int i = 1; i <= qtdePlayersTemp; i++) {
+                
+                if (i == idTankReal)
                     continue;
                 
-                switch (i + 1) {
+                tankTemp = new tank();
+                sqmAux = new JPanel();   
+            
+                tankTemp.setSize(25, 25);
+                tankTemp.setLocation(2, 2);
+                System.out.println(" i " + String.valueOf(i));
+                
+                switch (i) {
                     case 2:
                         tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-oeste.png")));
                         sqmAux = getSQM(11, 4);
@@ -493,8 +498,8 @@ public class ViewBattlefield extends javax.swing.JFrame {
                         break;
                     case 4:
                         tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-quatro-norte.png")));
-                        sqmAux = getSQM(6, 11);
-                        matBattleField[6][11] = 4;
+                        sqmAux = getSQM(6, 8);
+                        matBattleField[6][8] = 4;
                         break;
                 }
                 sqmAux.add(tankTemp);
@@ -522,8 +527,8 @@ public class ViewBattlefield extends javax.swing.JFrame {
                     break;
                 case 4:
                     tankTempComponente.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-quatro-norte.png")));
-                    sqmAux = getSQM(6, 11);
-                    matBattleField[6][11] = 4;
+                    sqmAux = getSQM(6, 8);
+                    matBattleField[6][8] = 4;
                     break;
                 }
                 sqmAux.add(tankTempComponente);
@@ -916,11 +921,7 @@ public class ViewBattlefield extends javax.swing.JFrame {
         }
         
         private void verifyWinner(){
-            System.out.println(" qtdePlayers " + String.valueOf(qtdePlayers));
-            
-            for (int i = 1; i < qtdePlayers; i++) {
-                System.out.println(" playersVivo[i] " + String.valueOf(playersVivo[i]));
-                
+            for (int i = 1; i <= qtdePlayers; i++) {
                 if (i == idTankReal)
                     continue;
                 if (playersVivo[i])                    
