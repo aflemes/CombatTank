@@ -40,6 +40,7 @@ public class ViewBattlefield extends javax.swing.JFrame {
         private victory jpVictory;
         private boolean lgEscutou;
         private int idTankReal;
+        private boolean playersVivo[];
 
 	public ViewBattlefield(ServerSocket server) {
             System.out.println("Servidor - " + server.toString());
@@ -149,11 +150,13 @@ public class ViewBattlefield extends javax.swing.JFrame {
                     modelTCPTransf tcpTransfTemp;
                     
                     socketClient = new Socket[4];
+                    playersVivo = new boolean[4];
                     
                     while (true){
                         //aceita as conexoes no servidor
                         try {
                             socketClient[qtdePlayers] = socketServidor.accept();
+                            playersVivo[qtdePlayers] = true;
                         } catch (IOException ex) {
                             Logger.getLogger(ViewBattlefield.class.getName()).log(Level.SEVERE, null, ex);
                         }
@@ -226,6 +229,8 @@ public class ViewBattlefield extends javax.swing.JFrame {
 
             sqmAux.add(tankTemp);
             sqmAux.repaint();
+            //
+            playersVivo = new boolean[4];
             
             try {
                 getIdTank();
@@ -323,8 +328,12 @@ public class ViewBattlefield extends javax.swing.JFrame {
             ObjectInputStream clientInputStream = null;
             
             while (true) {
-                clientInputStream = new ObjectInputStream(socketClient[1].getInputStream());
-
+                if (this.lifeBarAux.getQtdeLife() <= 0)
+                    if (socketServidor == null)
+                        break;
+                
+                clientInputStream = new ObjectInputStream(socketClient[1].getInputStream());                
+                
                 try {
                     tcpTransfTemp = (modelTCPTransf)clientInputStream.readObject();                    
                 } catch (ClassNotFoundException ex) {
@@ -385,6 +394,12 @@ public class ViewBattlefield extends javax.swing.JFrame {
                     atribuiMoveTank(idTankReal);
 
                     addTank(tcpTransfTemp);
+                    break;
+                case "death":
+                    playersVivo[tcpTransfTemp.getIdTank()] = false;
+                    
+                    setDeathTank(tcpTransfTemp);                   
+                    verifyWinner();
                     break;
                 case "mov":
                     //envia para todas os sockets
@@ -869,10 +884,51 @@ public class ViewBattlefield extends javax.swing.JFrame {
         
         private void faleci(int idTank){
             modelTCPTransf tcpTransfer = new modelTCPTransf();
-            tcpTransfer.setAcao("Death");
-            tcpTransfer.setIdTank(idTank);            
+            tcpTransfer.setAcao("death");
+            tcpTransfer.setIdTank(idTank);
 
-            sendData(tcpTransfer,1);
+            if (socketServidor == null)
+                sendData(tcpTransfer,1);
+            else
+                for (int i = 1; i < qtdePlayers; i++) {
+                    sendData(tcpTransfer,i);                    
+                }
+        }
+        
+        private void setDeathTank(modelTCPTransf tcpTransfTemp){
+            JPanel sqmAux;
+            tank tankTemp = new tank();
+            
+            for (int i = 0; i < 12; i++) {
+                for (int j = 0; j < 9; j++) {                       
+                    if (matBattleField[i][j] == tcpTransfTemp.getIdTank()){
+                        sqmAux = getSQM(i, j);
+                        sqmAux.removeAll();
+                        //
+                        tankTemp.setSize(25, 25);                        
+                        tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/death.png")));
+                        sqmAux.add(tankTemp);
+                        sqmAux.repaint();
+                        break;
+                    }
+                }                
+            }                    
+        }
+        
+        private void verifyWinner(){
+            System.out.println(" qtdePlayers " + String.valueOf(qtdePlayers));
+            
+            for (int i = 1; i < qtdePlayers; i++) {
+                System.out.println(" playersVivo[i] " + String.valueOf(playersVivo[i]));
+                
+                if (i == idTankReal)
+                    continue;
+                if (playersVivo[i])                    
+                    return;
+            }
+            
+            //nao tem nenhum tank vivo
+            this.jpVictory.setVisible(true);
         }
         
         private int verificaVidas(){
