@@ -482,22 +482,25 @@ public class ViewBattlefield extends javax.swing.JFrame {
                 sqmAux = new JPanel();   
             
                 tankTemp.setSize(25, 25);
-                tankTemp.setLocation(2, 2);
+                tankTemp.setLocation(2, 2);                
                 System.out.println(" i " + String.valueOf(i));
                 
                 switch (i) {
                     case 2:
                         tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-oeste.png")));
+                        tankTemp.setDirecao("oeste");
                         sqmAux = getSQM(11, 4);
                         matBattleField[11][4] = 2;
                         break;
                     case 3:
                         tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-tres-sul.png")));
+                        tankTemp.setDirecao("sul");
                         sqmAux = getSQM(6, 0);
                         matBattleField[6][0] = 3;
                         break;
                     case 4:
                         tankTemp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-quatro-norte.png")));
+                        tankTemp.setDirecao("norte");
                         sqmAux = getSQM(6, 8);
                         matBattleField[6][8] = 4;
                         break;
@@ -517,16 +520,19 @@ public class ViewBattlefield extends javax.swing.JFrame {
             switch (tcpTransfTemp.getIdTank()){
                 case 2:
                     tankTempComponente.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-dois-oeste.png")));
+                    tankTempComponente.setDirecao("oeste");
                     sqmAux = getSQM(11, 4);
                     matBattleField[11][4] = 2;
                     break;
                 case 3:
                     tankTempComponente.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-tres-sul.png")));
+                    tankTempComponente.setDirecao("sul");
                     sqmAux = getSQM(6, 0);
                     matBattleField[6][0] = 3;
                     break;
                 case 4:
                     tankTempComponente.setIcon(new javax.swing.ImageIcon(getClass().getResource("/combattank/img/tank-quatro-norte.png")));
+                    tankTempComponente.setDirecao("norte");
                     sqmAux = getSQM(6, 8);
                     matBattleField[6][8] = 4;
                     break;
@@ -720,10 +726,7 @@ public class ViewBattlefield extends javax.swing.JFrame {
             // encontra o tank para pegar a direcao
             posicao = getSQMByTank(idTank);
             JPanel sqmAux = getSQM(posicao[0], posicao[1]);
-            tank tankTemp;
-            tankTemp = (tank) sqmAux.getComponent(0);
-
-            tankTemp.getDirecao();
+            tank tankTemp = (tank) sqmAux.getComponent(0);            
 
             if (tankTemp.isShoot())
                 return;
@@ -803,7 +806,7 @@ public class ViewBattlefield extends javax.swing.JFrame {
             jShoot.setLocation(1, 12);
 
             int aux = 1;
-
+            
             for (int i = posicao[0]; i < matBattleField.length - 1; i++) {
                 // verifica se o tiro acertou algum tank
                 if (verificaAcerto(posicao[0] + aux, posicao[1]))
@@ -828,7 +831,7 @@ public class ViewBattlefield extends javax.swing.JFrame {
             jShoot.setLocation(1, 12);
 
             int aux = 1;
-
+            
             for (int i = posicao[0]; i > 0; i--) {
                 // verifica se o tiro acertou algum tank
                 if (verificaAcerto(posicao[0] - aux, posicao[1]))
