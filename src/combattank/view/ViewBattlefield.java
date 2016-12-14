@@ -173,28 +173,33 @@ public class ViewBattlefield extends javax.swing.JFrame {
                         }.start();
                         
                         
-                        tcpTransfTemp = new modelTCPTransf();
-                        tcpTransfTemp.setAcao("sync");
-                        tcpTransfTemp.setIdTank(qtdePlayers);
-                        //
-                        sendData(tcpTransfTemp,qtdePlayers - 1);
                         
-                        //
-                        addTankTo(qtdePlayers);
-                        
-                        //SINCRONIZA COM TODAS INSTANCIAS                        
-                        for (int i = 1; i < qtdePlayers; i++) {
-                            tcpTransfTemp = new modelTCPTransf();
-                            tcpTransfTemp.setAcao("add");
-                            tcpTransfTemp.setIdTank(qtdePlayers);
-                            
-                            sendData(tcpTransfTemp,i);                            
-                        }
                     }
                 }
             }.start();
 	}
         
+		private void createPlayer(){
+			System.out.println("CREATEOKAYER");
+			modelTCPTransf tcpTransfTemp;
+			tcpTransfTemp = new modelTCPTransf();
+            tcpTransfTemp.setAcao("sync");
+            tcpTransfTemp.setIdTank(qtdePlayers);
+            //
+            sendData(tcpTransfTemp,qtdePlayers - 1);
+            
+            //
+            addTankTo(qtdePlayers);
+            
+            //SINCRONIZA COM TODAS INSTANCIAS                        
+            for (int i = 1; i < qtdePlayers; i++) {
+                tcpTransfTemp = new modelTCPTransf();
+                tcpTransfTemp.setAcao("add");
+                tcpTransfTemp.setIdTank(qtdePlayers);
+                
+                sendData(tcpTransfTemp,i);                            
+            }
+		}
         private void listenerServer(int indice) throws IOException{
             modelTCPTransf tcpTemp = null;
 
@@ -231,7 +236,9 @@ public class ViewBattlefield extends javax.swing.JFrame {
             sqmAux.repaint();
             //
             playersVivo = new boolean[4];
-            
+            modelTCPTransf tcpTransfer = new modelTCPTransf();
+            tcpTransfer.setAcao("create");
+            sendData(tcpTransfer,1);
             try {
                 getIdTank();
             } catch (IOException ex) {
@@ -244,7 +251,7 @@ public class ViewBattlefield extends javax.swing.JFrame {
                     try {
                         receiveInputs(idTankReal);
                     } catch (IOException e) {
-                        System.out.println("Ocorreu um erro esperado, mas n�o t�o esperado assim para tratarmos.");
+                        System.out.println("Ocorreu um erro esperado, mas nï¿½o tï¿½o esperado assim para tratarmos.");
                         e.printStackTrace();
                     }
                 }
@@ -418,6 +425,9 @@ public class ViewBattlefield extends javax.swing.JFrame {
                     else
                         shootTank(idTank);   
                     break;
+                case "create":
+                	createPlayer();
+                	break;
                 default:
                     break;
                     
